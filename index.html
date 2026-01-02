@@ -136,6 +136,18 @@
                 height: -webkit-fill-available;
             }
         }
+        
+        .android-green {
+            background: linear-gradient(135deg, #3DDC84 0%, #34A853 100%);
+        }
+        
+        .android-green-text {
+            color: #3DDC84;
+        }
+        
+        .android-bg {
+            background: linear-gradient(135deg, #3DDC8420 0%, #34A85320 100%);
+        }
     </style>
 </head>
 <body class="min-h-screen">
@@ -161,28 +173,27 @@
                 <h2 class="text-2xl font-semibold text-white mb-8 text-center">Collezione</h2>
                 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    <!-- Opera 1: Cubo -->
+                    <!-- Opera 1: Android -->
                     <div class="art-card glass rounded-2xl p-8">
                         <div class="mb-6">
-                            <div class="w-full h-48 rounded-xl mb-6 flex items-center justify-center" 
-                                 style="background: linear-gradient(135deg, #e74c3c20 0%, #c0392b20 100%)">
-                                <div class="w-32 h-32" 
-                                     style="background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%); 
-                                            transform: rotate(15deg);
-                                            box-shadow: 0 20px 40px rgba(231, 76, 60, 0.3);">
+                            <div class="w-full h-48 rounded-xl mb-6 flex items-center justify-center android-bg">
+                                <div class="w-32 h-32 relative flex items-center justify-center">
+                                    <!-- Icona Android -->
+                                    <svg viewBox="0 0 24 24" class="w-32 h-32 android-green-text">
+                                        <path fill="currentColor" d="M6 18c0 .55.45 1 1 1h1v3.5c0 .83.67 1.5 1.5 1.5s1.5-.67 1.5-1.5V19h2v3.5c0 .83.67 1.5 1.5 1.5s1.5-.67 1.5-1.5V19h1c.55 0 1-.45 1-1V8H6v10zM3.5 8C2.67 8 2 8.67 2 9.5v7c0 .83.67 1.5 1.5 1.5S5 17.33 5 16.5v-7C5 8.67 4.33 8 3.5 8zm17 0c-.83 0-1.5.67-1.5 1.5v7c0 .83.67 1.5 1.5 1.5s1.5-.67 1.5-1.5v-7c0-.83-.67-1.5-1.5-1.5zm-4.97-5.84l1.3-1.3c.2-.2.2-.51 0-.71-.2-.2-.51-.2-.71 0l-1.48 1.48C13.85 1.23 12.95 1 12 1c-.96 0-1.86.23-2.66.63L7.85.15c-.2-.2-.51-.2-.71 0-.2.2-.2.51 0 .71l1.31 1.31C6.97 3.26 6 5.01 6 7h12c0-1.99-.97-3.75-2.47-4.84zM10 5H9V4h1v1zm5 0h-1V4h1v1z"/>
+                                    </svg>
                                 </div>
                             </div>
                             <div class="flex items-center gap-3 mb-3">
-                                <span class="px-3 py-1 rounded-full text-xs font-medium" 
-                                      style="background: linear-gradient(135deg, #e74c3c20 0%, #c0392b20 100%); color: #e74c3c">
-                                    Scultura
+                                <span class="px-3 py-1 rounded-full text-xs font-medium android-bg android-green-text">
+                                    Tecnologia
                                 </span>
                                 <span class="text-sm text-slate-400">2023</span>
                             </div>
-                            <h3 class="text-xl font-semibold text-white mb-2">Scultura Cubica Moderna</h3>
-                            <p class="text-slate-300 mb-1">Giuseppe Rossi</p>
+                            <h3 class="text-xl font-semibold text-white mb-2">Android</h3>
+                            <p class="text-slate-300 mb-1">Google</p>
                             <p class="text-slate-400 text-sm leading-relaxed">
-                                Una rappresentazione minimalista dell'equilibrio tra forma e spazio, dove ogni angolo racconta una storia di precisione matematica.
+                                Il celebre robot verde di Android, icona dell'innovazione mobile. Un'opera che rappresenta l'evoluzione della tecnologia e della connettività moderna.
                             </p>
                         </div>
                         <button onclick="viewArtworkAR(1)" 
@@ -244,12 +255,12 @@
     <script>
         const artworks = {
             1: {
-                name: "Scultura Cubica Moderna",
-                author: "Giuseppe Rossi",
+                name: "Android",
+                author: "Google",
                 year: "2023",
-                description: "Una rappresentazione minimalista dell'equilibrio tra forma e spazio.",
-                color: "#e74c3c",
-                glb: "https://modelviewer.dev/shared-assets/models/cube.gltf"
+                description: "Il celebre robot verde di Android, icona dell'innovazione mobile e della tecnologia moderna.",
+                color: "#3DDC84",
+                glb: "assets/android.glb"
             },
             2: {
                 name: "Sfera Celeste",
@@ -346,6 +357,17 @@
             document.getElementById('closeAR').onclick = () => {
                 document.body.removeChild(viewer);
             };
+            
+            // Gestione errore nel caricamento del modello
+            viewer.addEventListener('error', (event) => {
+                console.error('Errore nel caricamento del modello:', event.detail);
+                showNotification('Errore nel caricamento del modello 3D. Controlla che il file assets/android.glb esista.');
+            });
+            
+            // Controlla se il modello viene caricato
+            viewer.addEventListener('load', () => {
+                console.log('Modello caricato con successo');
+            });
         }
 
         // Notifica iniziale
@@ -382,6 +404,34 @@
                 }, 3000);
             }, 1000);
         });
+
+        function showNotification(message) {
+            const notification = document.createElement('div');
+            notification.textContent = message;
+            notification.style.cssText = `
+                position: fixed;
+                top: 24px;
+                left: 50%;
+                transform: translateX(-50%);
+                background: rgba(239, 68, 68, 0.9);
+                color: white;
+                padding: 12px 24px;
+                border-radius: 12px;
+                z-index: 10000;
+                max-width: 90%;
+                text-align: center;
+                font-size: 0.875rem;
+                animation: fadeInUp 0.3s ease-out;
+                box-shadow: 0 10px 25px rgba(239, 68, 68, 0.2);
+                backdrop-filter: blur(10px);
+            `;
+            document.body.appendChild(notification);
+            setTimeout(() => {
+                notification.style.opacity = '0';
+                notification.style.transform = 'translateX(-50%) translateY(-10px)';
+                setTimeout(() => notification.remove(), 300);
+            }, 4000);
+        }
     </script>
 </body>
 </html>
