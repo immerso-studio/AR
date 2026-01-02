@@ -2,10 +2,23 @@
 <html lang="it">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Museum AR - Galleria Virtuale</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Model Viewer per AR -->
+    <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.3.0/model-viewer.min.js"></script>
     <style>
+        body {
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+        }
+        
+        #homeScreen {
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        
         @keyframes float {
             0%, 100% { transform: perspective(200px) rotateX(20deg) rotateY(-20deg) translateY(0); }
             50% { transform: perspective(200px) rotateX(20deg) rotateY(-20deg) translateY(-10px); }
@@ -32,12 +45,41 @@
         .animate-pulse-scale { animation: pulse 2s ease-in-out infinite; }
         .animate-rotate { animation: rotate 4s linear infinite; }
         .animate-sway { animation: sway 2.5s ease-in-out infinite; }
+        
+        model-viewer {
+            width: 100%;
+            height: 100vh;
+            background-color: transparent;
+        }
+        
+        .ar-button {
+            background-color: #8b5cf6;
+            color: white;
+            border-radius: 9999px;
+            padding: 1rem 2rem;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            font-size: 1.125rem;
+        }
+        
+        /* Stile per iOS Safari */
+        @supports (-webkit-touch-callout: none) {
+            body {
+                height: 100vh;
+                overflow: hidden;
+            }
+            #homeScreen {
+                height: 100vh;
+                overflow-y: scroll;
+            }
+        }
     </style>
 </head>
-<body class="m-0 p-0 overflow-hidden">
+<body>
     <!-- Schermata Home -->
     <div id="homeScreen" class="min-h-screen bg-gradient-to-br from-purple-900 via-indigo-900 to-blue-900 text-white">
-        <div class="container mx-auto px-4 py-8">
+        <div class="container mx-auto px-4 py-8 pb-24">
             <header class="text-center mb-12">
                 <h1 class="text-5xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-pink-300 to-purple-300">
                     Museum AR
@@ -45,17 +87,24 @@
                 <p class="text-xl text-purple-200">Galleria d'Arte in Realtà Aumentata</p>
             </header>
 
-            <div id="arSupportWarning" class="hidden bg-yellow-500/20 border border-yellow-500 rounded-lg p-6 mb-8 max-w-2xl mx-auto">
+            <div id="instructionsBox" class="bg-blue-500/20 border border-blue-500 rounded-lg p-6 mb-8 max-w-2xl mx-auto">
                 <div class="flex items-start gap-4">
-                    <svg class="w-6 h-6 text-yellow-300 flex-shrink-0 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-6 h-6 text-blue-300 flex-shrink-0 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                     </svg>
                     <div>
-                        <h3 class="font-semibold text-yellow-300 mb-2">AR non supportata</h3>
-                        <p class="text-yellow-100 text-sm">
-                            Il tuo dispositivo non supporta WebXR AR. Per l'esperienza completa, usa un dispositivo mobile compatibile con ARCore (Android) o ARKit (iOS).
-                            <br><br>
-                            <strong>Modalità Demo:</strong> Puoi comunque provare l'interfaccia in modalità simulata.
+                        <h3 class="font-semibold text-blue-300 mb-2">Come funziona</h3>
+                        <p class="text-blue-100 text-sm">
+                            <strong>Su dispositivo mobile:</strong><br>
+                            1. Seleziona un'opera dalla collezione<br>
+                            2. Premi "Visualizza in AR"<br>
+                            3. Dai il permesso alla fotocamera<br>
+                            4. Inquadra una superficie piatta<br>
+                            5. L'opera apparirà nello spazio reale!<br><br>
+                            
+                            <strong>Requisiti:</strong><br>
+                            • Android: Chrome + ARCore<br>
+                            • iOS: Safari + ARKit (iOS 12+)
                         </p>
                     </div>
                 </div>
@@ -65,6 +114,7 @@
                 <div class="bg-white/10 backdrop-blur-lg rounded-2xl p-8 mb-8">
                     <h2 class="text-2xl font-bold mb-6">Collezione Disponibile</h2>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Opera 1: Cubo -->
                         <div class="bg-white/5 rounded-xl p-6 hover:bg-white/10 transition">
                             <div class="flex items-center gap-4 mb-4">
                                 <div style="background-color: #e74c3c" class="w-16 h-16 rounded-lg flex items-center justify-center text-white text-2xl font-bold">◼</div>
@@ -73,9 +123,13 @@
                                     <p class="text-sm text-purple-200">Giuseppe Rossi - 2023</p>
                                 </div>
                             </div>
-                            <p class="text-sm text-purple-100">Una rappresentazione geometrica dell'equilibrio tra forma e spazio.</p>
+                            <p class="text-sm text-purple-100 mb-4">Una rappresentazione geometrica dell'equilibrio tra forma e spazio.</p>
+                            <button onclick="viewArtworkAR(1)" class="w-full bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600 text-white px-6 py-3 rounded-lg font-semibold transition">
+                                🔍 Visualizza in AR
+                            </button>
                         </div>
 
+                        <!-- Opera 2: Sfera -->
                         <div class="bg-white/5 rounded-xl p-6 hover:bg-white/10 transition">
                             <div class="flex items-center gap-4 mb-4">
                                 <div style="background-color: #3498db" class="w-16 h-16 rounded-lg flex items-center justify-center text-white text-2xl font-bold">●</div>
@@ -84,9 +138,13 @@
                                     <p class="text-sm text-purple-200">Maria Bianchi - 2022</p>
                                 </div>
                             </div>
-                            <p class="text-sm text-purple-100">Ispirata ai corpi celesti e all'infinito dello spazio.</p>
+                            <p class="text-sm text-purple-100 mb-4">Ispirata ai corpi celesti e all'infinito dello spazio.</p>
+                            <button onclick="viewArtworkAR(2)" class="w-full bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600 text-white px-6 py-3 rounded-lg font-semibold transition">
+                                🔍 Visualizza in AR
+                            </button>
                         </div>
 
+                        <!-- Opera 3: Piramide -->
                         <div class="bg-white/5 rounded-xl p-6 hover:bg-white/10 transition">
                             <div class="flex items-center gap-4 mb-4">
                                 <div style="background-color: #f39c12" class="w-16 h-16 rounded-lg flex items-center justify-center text-white text-2xl font-bold">▲</div>
@@ -95,9 +153,13 @@
                                     <p class="text-sm text-purple-200">Antonio Verdi - 2021</p>
                                 </div>
                             </div>
-                            <p class="text-sm text-purple-100">Un omaggio alle antiche civiltà e alla loro saggezza architettonica.</p>
+                            <p class="text-sm text-purple-100 mb-4">Un omaggio alle antiche civiltà e alla loro saggezza architettonica.</p>
+                            <button onclick="viewArtworkAR(3)" class="w-full bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600 text-white px-6 py-3 rounded-lg font-semibold transition">
+                                🔍 Visualizza in AR
+                            </button>
                         </div>
 
+                        <!-- Opera 4: Cilindro -->
                         <div class="bg-white/5 rounded-xl p-6 hover:bg-white/10 transition">
                             <div class="flex items-center gap-4 mb-4">
                                 <div style="background-color: #9b59b6" class="w-16 h-16 rounded-lg flex items-center justify-center text-white text-2xl font-bold">⬭</div>
@@ -106,299 +168,199 @@
                                     <p class="text-sm text-purple-200">Laura Neri - 2024</p>
                                 </div>
                             </div>
-                            <p class="text-sm text-purple-100">La continuità senza fine, il movimento perpetuo dell'arte.</p>
+                            <p class="text-sm text-purple-100 mb-4">La continuità senza fine, il movimento perpetuo dell'arte.</p>
+                            <button onclick="viewArtworkAR(4)" class="w-full bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600 text-white px-6 py-3 rounded-lg font-semibold transition">
+                                🔍 Visualizza in AR
+                            </button>
                         </div>
                     </div>
                 </div>
 
-                <div class="text-center">
-                    <button id="startArBtn" class="bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600 text-white px-12 py-4 rounded-full text-xl font-semibold inline-flex items-center gap-3 transition shadow-lg hover:shadow-xl">
+                <div class="text-center mb-8">
+                    <button onclick="openMultiAR()" class="bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600 text-white px-12 py-4 rounded-full text-xl font-semibold inline-flex items-center gap-3 transition shadow-lg hover:shadow-xl">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/>
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/>
                         </svg>
-                        <span id="btnText">Avvia Modalità Demo</span>
+                        Modalità Galleria AR
                     </button>
-                    <p class="text-purple-200 mt-4 text-sm" id="startHint">Esplora l'interfaccia in modalità simulata</p>
+                    <p class="text-purple-200 mt-4 text-sm">Posiziona multiple opere nello spazio</p>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Schermata AR -->
-    <div id="arScreen" class="hidden relative w-full h-screen overflow-hidden bg-black">
-        <div id="arContainer" class="w-full h-full relative cursor-crosshair" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
-            <!-- Le opere verranno posizionate qui -->
-            <div class="absolute inset-0 pointer-events-none">
-                <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-8 h-8 border-2 border-white rounded-full animate-pulse"></div>
-            </div>
-        </div>
-
-        <!-- Header AR -->
-        <div class="absolute top-0 left-0 right-0 p-4 bg-gradient-to-b from-black/60 to-transparent">
-            <div class="flex justify-between items-start">
-                <div class="bg-black/50 backdrop-blur rounded-lg px-4 py-2">
-                    <p id="selectedArtworkName" class="text-white text-sm font-semibold">Seleziona un'opera</p>
-                    <p id="artworkCounter" class="text-purple-300 text-xs">0 opere posizionate</p>
-                </div>
-                
-                <button id="infoBtn" class="bg-black/50 backdrop-blur p-2 rounded-lg">
-                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                    </svg>
-                </button>
-            </div>
-
-            <div id="infoPanel" class="hidden mt-4 bg-black/70 backdrop-blur rounded-lg p-4 text-white">
-                <h3 class="font-bold mb-2">Come usare:</h3>
-                <ul class="text-sm space-y-1">
-                    <li>• Seleziona un'opera dal menu in basso</li>
-                    <li>• Tocca lo schermo per posizionarla</li>
-                    <li>• Tocca un'opera per rimuoverla</li>
-                    <li>• Muovi il dispositivo per esplorare</li>
-                </ul>
-            </div>
-        </div>
-
-        <!-- Footer AR -->
-        <div class="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/80 to-transparent">
-            <div class="flex gap-3 overflow-x-auto pb-2" id="artworkSelector">
-                <!-- Opere selezionabili -->
+    <!-- Schermata AR Multi-Opera -->
+    <div id="multiArScreen" class="hidden">
+        <model-viewer id="arViewer"
+            camera-controls 
+            touch-action="pan-y"
+            ar 
+            ar-modes="webxr scene-viewer quick-look"
+            ar-scale="auto"
+            auto-rotate
+            shadow-intensity="1"
+            style="width: 100%; height: 100vh;">
+            
+            <button slot="ar-button" class="ar-button" style="position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);">
+                📱 Avvia AR
+            </button>
+            
+            <div style="position: absolute; top: 20px; left: 20px; right: 20px; background: rgba(0,0,0,0.7); padding: 20px; border-radius: 12px; color: white;">
+                <h3 style="margin: 0 0 10px 0; font-size: 1.25rem; font-weight: bold;">Modalità AR Attiva</h3>
+                <p style="margin: 0; font-size: 0.875rem;">Premi il pulsante "Avvia AR" per aprire la fotocamera e posizionare le opere nello spazio reale.</p>
             </div>
             
-            <div class="flex justify-center gap-4 mt-4">
-                <button id="exitArBtn" class="bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-full text-sm font-semibold transition">
-                    <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                    </svg>
-                    Esci da AR
-                </button>
-                <button id="clearAllBtn" class="bg-white/20 hover:bg-white/30 text-white px-6 py-2 rounded-full text-sm font-semibold transition">
-                    Rimuovi Tutto
-                </button>
-            </div>
-        </div>
+            <button onclick="closeMultiAR()" style="position: absolute; top: 20px; right: 20px; background: rgba(239, 68, 68, 0.9); color: white; border: none; padding: 10px 20px; border-radius: 9999px; font-weight: 600; cursor: pointer;">
+                ✕ Chiudi
+            </button>
+        </model-viewer>
     </div>
 
     <script>
-        const artworks = [
-            {
-                id: 1,
+        const artworks = {
+            1: {
                 name: "Scultura Cubica Moderna",
-                artist: "Giuseppe Rossi",
-                year: "2023",
                 color: "#e74c3c",
-                shape: "cube",
-                icon: "◼"
+                glb: "data:application/octet-stream;base64,Z2xURg" // Placeholder
             },
-            {
-                id: 2,
+            2: {
                 name: "Sfera Celeste",
-                artist: "Maria Bianchi",
-                year: "2022",
                 color: "#3498db",
-                shape: "sphere",
-                icon: "●"
+                glb: "data:application/octet-stream;base64,Z2xURg"
             },
-            {
-                id: 3,
+            3: {
                 name: "Piramide Egizia",
-                artist: "Antonio Verdi",
-                year: "2021",
                 color: "#f39c12",
-                shape: "pyramid",
-                icon: "▲"
+                glb: "data:application/octet-stream;base64,Z2xURg"
             },
-            {
-                id: 4,
+            4: {
                 name: "Cilindro Infinito",
-                artist: "Laura Neri",
-                year: "2024",
                 color: "#9b59b6",
-                shape: "cylinder",
-                icon: "⬭"
+                glb: "data:application/octet-stream;base64,Z2xURg"
             }
-        ];
+        };
 
-        let arSupported = false;
-        let selectedArtwork = null;
-        let placedArtworks = [];
-
-        // Verifica supporto AR
-        async function checkARSupport() {
-            if ('xr' in navigator) {
-                try {
-                    arSupported = await navigator.xr.isSessionSupported('immersive-ar');
-                } catch (err) {
-                    arSupported = false;
-                }
-            }
-            
-            if (!arSupported) {
-                document.getElementById('arSupportWarning').classList.remove('hidden');
-            } else {
-                document.getElementById('btnText').textContent = 'Avvia Esperienza AR';
-                document.getElementById('startHint').textContent = 'Inquadra uno spazio piatto per iniziare';
-            }
-        }
-
-        // Avvia AR
-        function startAR() {
-            document.getElementById('homeScreen').classList.add('hidden');
-            document.getElementById('arScreen').classList.remove('hidden');
-            
-            setTimeout(() => {
-                showNotification("Piano rilevato! Tocca per posizionare un'opera");
-            }, 2000);
-            
-            initArtworkSelector();
-        }
-
-        // Inizializza selettore opere
-        function initArtworkSelector() {
-            const selector = document.getElementById('artworkSelector');
-            selector.innerHTML = '';
-            
-            artworks.forEach(artwork => {
-                const btn = document.createElement('button');
-                btn.className = 'flex-shrink-0 rounded-xl p-3 transition bg-white/10';
-                btn.innerHTML = `
-                    <div style="background-color: ${artwork.color}" class="w-12 h-12 rounded-lg mb-2 flex items-center justify-center text-white text-2xl">
-                        ${artwork.icon}
-                    </div>
-                    <p class="text-white text-xs font-semibold text-center max-w-[80px]">${artwork.name.split(' ')[0]}</p>
-                `;
-                btn.onclick = () => selectArtwork(artwork.id, btn);
-                selector.appendChild(btn);
-            });
-        }
-
-        // Seleziona opera
-        function selectArtwork(id, btnElement) {
-            selectedArtwork = id;
-            const artwork = artworks.find(a => a.id === id);
-            document.getElementById('selectedArtworkName').textContent = artwork.name;
-            
-            // Aggiorna stile pulsanti
-            document.querySelectorAll('#artworkSelector button').forEach(btn => {
-                btn.className = 'flex-shrink-0 rounded-xl p-3 transition bg-white/10';
-            });
-            btnElement.className = 'flex-shrink-0 rounded-xl p-3 transition bg-white/30 ring-2 ring-white';
-        }
-
-        // Posiziona opera
-        function placeArtwork(e) {
-            if (!selectedArtwork) return;
-            
-            const container = document.getElementById('arContainer');
-            const rect = container.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
-            
-            const artwork = artworks.find(a => a.id === selectedArtwork);
-            const placementId = Date.now();
-            
-            const artworkEl = createArtworkElement(artwork, x, y, placementId);
-            container.appendChild(artworkEl);
-            
-            placedArtworks.push(placementId);
-            updateCounter();
-            showNotification(`${artwork.name} posizionata!`);
-        }
-
-        // Crea elemento opera
-        function createArtworkElement(artwork, x, y, placementId) {
-            const container = document.createElement('div');
-            container.style.cssText = `
-                position: absolute;
-                left: ${x - 40}px;
-                top: ${y - 40}px;
-                transform: rotate(${Math.random() * 360}deg);
-                transition: all 0.3s ease;
-                cursor: pointer;
-                filter: drop-shadow(0 10px 20px rgba(0,0,0,0.3));
-            `;
-            container.onclick = (e) => {
-                e.stopPropagation();
-                removeArtwork(placementId, container);
+        function generateSimpleGLB(shape, color) {
+            // Per questa demo, utilizziamo model viewer con geometrie procedurali
+            // In produzione, caricheresti file GLB reali
+            const glbUrls = {
+                cube: 'https://modelviewer.dev/shared-assets/models/cube.gltf',
+                sphere: 'https://modelviewer.dev/shared-assets/models/reflective-sphere.gltf',
+                pyramid: 'https://modelviewer.dev/shared-assets/models/pyramid.gltf',
+                cylinder: 'https://modelviewer.dev/shared-assets/models/cylinder.gltf'
             };
             
-            let shapeHTML = '';
-            switch(artwork.shape) {
-                case 'cube':
-                    shapeHTML = `<div style="width: 80px; height: 80px; background: linear-gradient(135deg, ${artwork.color} 0%, ${artwork.color}dd 100%); border: 3px solid white; transform: perspective(200px) rotateX(20deg) rotateY(-20deg);" class="animate-float"></div>`;
-                    break;
-                case 'sphere':
-                    shapeHTML = `<div style="width: 80px; height: 80px; border-radius: 50%; background: radial-gradient(circle at 30% 30%, ${artwork.color}ff, ${artwork.color}88); border: 3px solid white;" class="animate-pulse-scale"></div>`;
-                    break;
-                case 'pyramid':
-                    shapeHTML = `<div style="width: 0; height: 0; border-left: 40px solid transparent; border-right: 40px solid transparent; border-bottom: 80px solid ${artwork.color}; filter: drop-shadow(0 5px 10px rgba(0,0,0,0.3));" class="animate-rotate"></div>`;
-                    break;
-                case 'cylinder':
-                    shapeHTML = `<div style="width: 60px; height: 90px; background: linear-gradient(90deg, ${artwork.color}88 0%, ${artwork.color} 50%, ${artwork.color}88 100%); border-radius: 30px; border: 3px solid white;" class="animate-sway"></div>`;
-                    break;
-            }
+            return glbUrls[shape] || glbUrls.cube;
+        }
+
+        function viewArtworkAR(artworkId) {
+            const artwork = artworks[artworkId];
             
-            container.innerHTML = shapeHTML;
-            return container;
+            // Crea viewer temporaneo per singola opera
+            const viewer = document.createElement('model-viewer');
+            viewer.setAttribute('camera-controls', '');
+            viewer.setAttribute('touch-action', 'pan-y');
+            viewer.setAttribute('ar', '');
+            viewer.setAttribute('ar-modes', 'webxr scene-viewer quick-look');
+            viewer.setAttribute('ar-scale', 'auto');
+            viewer.setAttribute('auto-rotate', '');
+            viewer.setAttribute('shadow-intensity', '1');
+            viewer.style.cssText = 'position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 9999; background: rgba(0,0,0,0.95);';
+            
+            // Imposta modello (in produzione usare file GLB reale)
+            const modelUrl = generateSimpleGLB(['cube', 'sphere', 'pyramid', 'cylinder'][artworkId - 1], artwork.color);
+            viewer.setAttribute('src', modelUrl);
+            
+            // Pulsante AR
+            const arButton = document.createElement('button');
+            arButton.setAttribute('slot', 'ar-button');
+            arButton.className = 'ar-button';
+            arButton.textContent = '📱 Visualizza in AR';
+            arButton.style.cssText = 'position: absolute; bottom: 80px; left: 50%; transform: translateX(-50%); z-index: 10;';
+            
+            // Info
+            const info = document.createElement('div');
+            info.style.cssText = 'position: absolute; top: 20px; left: 20px; right: 20px; background: rgba(0,0,0,0.8); padding: 20px; border-radius: 12px; color: white; z-index: 10;';
+            info.innerHTML = `
+                <h3 style="margin: 0 0 10px 0; font-size: 1.25rem; font-weight: bold;">${artwork.name}</h3>
+                <p style="margin: 0; font-size: 0.875rem;">Premi il pulsante AR per aprire la fotocamera e posizionare l'opera nello spazio reale.</p>
+            `;
+            
+            // Pulsante chiudi
+            const closeBtn = document.createElement('button');
+            closeBtn.textContent = '✕ Chiudi';
+            closeBtn.style.cssText = 'position: absolute; top: 20px; right: 20px; background: rgba(239, 68, 68, 0.9); color: white; border: none; padding: 10px 20px; border-radius: 9999px; font-weight: 600; cursor: pointer; z-index: 10;';
+            closeBtn.onclick = () => {
+                document.body.removeChild(viewer);
+            };
+            
+            viewer.appendChild(arButton);
+            viewer.appendChild(info);
+            viewer.appendChild(closeBtn);
+            document.body.appendChild(viewer);
+            
+            // Auto-attiva AR se supportato
+            setTimeout(() => {
+                if (viewer.canActivateAR) {
+                    showNotification('AR disponibile! Premi il pulsante per iniziare.');
+                } else {
+                    showNotification('AR non supportata su questo dispositivo. Usa Android con Chrome o iOS con Safari.');
+                }
+            }, 1000);
         }
 
-        // Rimuovi opera
-        function removeArtwork(placementId, element) {
-            element.remove();
-            placedArtworks = placedArtworks.filter(id => id !== placementId);
-            updateCounter();
+        function openMultiAR() {
+            document.getElementById('homeScreen').style.display = 'none';
+            document.getElementById('multiArScreen').classList.remove('hidden');
+            
+            const viewer = document.getElementById('arViewer');
+            // Usa un modello predefinito per la demo
+            viewer.setAttribute('src', 'https://modelviewer.dev/shared-assets/models/Astronaut.glb');
+            
+            setTimeout(() => {
+                if (viewer.canActivateAR) {
+                    showNotification('AR disponibile! Premi "Avvia AR" per iniziare.');
+                } else {
+                    showNotification('Per usare AR, apri questa pagina su un dispositivo mobile con Chrome (Android) o Safari (iOS).');
+                }
+            }, 1000);
         }
 
-        // Aggiorna contatore
-        function updateCounter() {
-            document.getElementById('artworkCounter').textContent = `${placedArtworks.length} opere posizionate`;
+        function closeMultiAR() {
+            document.getElementById('homeScreen').style.display = 'block';
+            document.getElementById('multiArScreen').classList.add('hidden');
         }
 
-        // Mostra notifica
         function showNotification(message) {
             const notification = document.createElement('div');
             notification.textContent = message;
             notification.style.cssText = `
                 position: fixed;
-                top: 20px;
+                top: 80px;
                 left: 50%;
                 transform: translateX(-50%);
-                background: rgba(0,0,0,0.8);
+                background: rgba(0,0,0,0.9);
                 color: white;
-                padding: 12px 24px;
-                border-radius: 8px;
+                padding: 16px 24px;
+                border-radius: 12px;
                 z-index: 10000;
-                animation: fadeInOut 3s ease-in-out;
+                max-width: 90%;
+                text-align: center;
+                font-size: 0.875rem;
+                animation: fadeInOut 4s ease-in-out;
+                box-shadow: 0 4px 6px rgba(0,0,0,0.3);
             `;
             document.body.appendChild(notification);
-            setTimeout(() => notification.remove(), 3000);
+            setTimeout(() => notification.remove(), 4000);
         }
 
-        // Rimuovi tutte le opere
-        function clearAll() {
-            document.querySelectorAll('#arContainer > div:not(.absolute.inset-0)').forEach(el => el.remove());
-            placedArtworks = [];
-            updateCounter();
-        }
-
-        // Event listeners
-        document.getElementById('startArBtn').addEventListener('click', startAR);
-        document.getElementById('arContainer').addEventListener('click', placeArtwork);
-        document.getElementById('exitArBtn').addEventListener('click', () => {
-            document.getElementById('homeScreen').classList.remove('hidden');
-            document.getElementById('arScreen').classList.add('hidden');
-            clearAll();
-            selectedArtwork = null;
+        // Mostra notifica iniziale
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                showNotification('💡 Consiglio: Per la migliore esperienza AR, usa un dispositivo mobile!');
+            }, 1500);
         });
-        document.getElementById('clearAllBtn').addEventListener('click', clearAll);
-        document.getElementById('infoBtn').addEventListener('click', () => {
-            const panel = document.getElementById('infoPanel');
-            panel.classList.toggle('hidden');
-        });
-
-        // Inizializza
-        checkARSupport();
     </script>
 </body>
 </html>
