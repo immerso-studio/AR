@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AR Chess Board</title>
     <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.2/dist/mindar-image-aframe.prod.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/ar.js@2.2.2/aframe/build/aframe-ar.min.js"></script>
     <style>
         body {
             margin: 0;
@@ -13,7 +13,7 @@
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
         }
         
-        #loading-screen {
+        #splash-screen {
             position: fixed;
             top: 0;
             left: 0;
@@ -24,13 +24,65 @@
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            z-index: 1000;
+            z-index: 2000;
             transition: opacity 0.5s;
         }
         
-        #loading-screen.hidden {
+        #splash-screen.hidden {
             opacity: 0;
             pointer-events: none;
+        }
+        
+        .splash-content {
+            text-align: center;
+            color: white;
+            max-width: 80%;
+        }
+        
+        .splash-content h1 {
+            font-size: 32px;
+            margin-bottom: 20px;
+            font-weight: 700;
+        }
+        
+        .splash-content p {
+            font-size: 16px;
+            margin-bottom: 30px;
+            opacity: 0.9;
+        }
+        
+        #start-ar-button {
+            background: white;
+            color: #667eea;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 30px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        
+        #start-ar-button:hover {
+            transform: scale(1.05);
+        }
+        
+        #loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1500;
+        }
+        
+        #loading-screen.active {
+            display: flex;
         }
         
         .spinner {
@@ -65,94 +117,144 @@
             text-align: center;
             max-width: 90%;
             z-index: 100;
+            display: none;
         }
         
-        #marker-status {
+        #instructions.visible {
+            display: block;
+        }
+        
+        #placement-indicator {
             position: fixed;
-            top: 20px;
+            top: 50%;
             left: 50%;
-            transform: translateX(-50%);
-            background: rgba(0, 0, 0, 0.8);
-            color: white;
-            padding: 10px 20px;
-            border-radius: 20px;
-            font-size: 14px;
-            z-index: 100;
+            width: 60px;
+            height: 60px;
+            margin: -30px 0 0 -30px;
+            border: 3px solid rgba(255, 255, 255, 0.8);
+            border-radius: 50%;
+            z-index: 50;
+            pointer-events: none;
+            display: none;
         }
         
-        .status-indicator {
-            display: inline-block;
+        #placement-indicator::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
             width: 10px;
             height: 10px;
+            background: white;
             border-radius: 50%;
-            margin-right: 8px;
-            background: #ff4444;
+            margin: -5px 0 0 -5px;
         }
         
-        .status-indicator.active {
-            background: #44ff44;
-            animation: pulse 1.5s ease-in-out infinite;
+        #placement-indicator.visible {
+            display: block;
+            animation: pulse-ring 1.5s ease-in-out infinite;
         }
         
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
+        @keyframes pulse-ring {
+            0%, 100% { 
+                transform: scale(1);
+                opacity: 0.8;
+            }
+            50% { 
+                transform: scale(1.2);
+                opacity: 0.4;
+            }
         }
         
-        #marker-generator {
+        #place-button {
             position: fixed;
-            top: 70px;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #44ff44;
+            color: black;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 30px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            z-index: 100;
+            display: none;
+            box-shadow: 0 4px 20px rgba(68, 255, 68, 0.4);
+        }
+        
+        #place-button.visible {
+            display: block;
+            animation: bounce 1s ease-in-out infinite;
+        }
+        
+        @keyframes bounce {
+            0%, 100% { transform: translateX(-50%) translateY(0); }
+            50% { transform: translateX(-50%) translateY(-10px); }
+        }
+        
+        #controls {
+            position: fixed;
+            top: 20px;
             right: 20px;
-            background: rgba(0, 0, 0, 0.8);
-            color: white;
-            padding: 15px;
-            border-radius: 10px;
+            display: none;
+            flex-direction: column;
+            gap: 10px;
             z-index: 100;
         }
         
-        #marker-generator button {
-            background: #667eea;
-            color: white;
-            border: none;
-            padding: 10px 15px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 14px;
-            margin-top: 10px;
-            width: 100%;
+        #controls.visible {
+            display: flex;
         }
         
-        #marker-generator button:hover {
-            background: #5568d3;
+        .control-button {
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            border: 2px solid white;
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            min-width: 100px;
+        }
+        
+        .control-button:hover {
+            background: rgba(255, 255, 255, 0.2);
         }
     </style>
 </head>
 <body>
-    <div id="loading-screen">
-        <div class="spinner"></div>
-        <div class="loading-text">Caricamento AR...</div>
+    <div id="splash-screen">
+        <div class="splash-content">
+            <h1>🎯 Scacchiera AR</h1>
+            <p>Posiziona la scacchiera su una superficie reale</p>
+            <button id="start-ar-button">Inizia Esperienza AR</button>
+        </div>
     </div>
     
-    <div id="marker-status">
-        <span class="status-indicator" id="status-dot"></span>
-        <span id="status-text">Cerca il marker</span>
+    <div id="loading-screen">
+        <div class="spinner"></div>
+        <div class="loading-text">Inizializzazione camera AR...</div>
     </div>
     
     <div id="instructions">
-        Punta la fotocamera verso il marker per visualizzare la scacchiera AR
+        Muovi il dispositivo per rilevare le superfici, poi tocca per posizionare la scacchiera
     </div>
     
-    <div id="marker-generator">
-        <div style="font-size: 12px; margin-bottom: 8px;">Marker QR Code</div>
-        <canvas id="marker-canvas" width="200" height="200" style="border: 2px solid white; border-radius: 5px;"></canvas>
-        <button onclick="downloadMarker()">Scarica Marker</button>
+    <div id="placement-indicator"></div>
+    
+    <button id="place-button">Posiziona Scacchiera</button>
+    
+    <div id="controls">
+        <button class="control-button" onclick="resetPosition()">Riposiziona</button>
+        <button class="control-button" onclick="toggleRotation()">Ruota</button>
     </div>
 
     <a-scene
-        mindar-image="imageTargetSrc: https://cdn.jsdelivr.net/npm/mind-ar@1.2.2/examples/image-tracking/assets/card-example/card.mind; autoStart: false; uiLoading: no; uiError: no; uiScanning: no;"
-        color-space="sRGB"
         embedded
-        renderer="colorManagement: true, physicallyCorrectLights"
+        arjs="sourceType: webcam; debugUIEnabled: false; detectionMode: mono_and_matrix; matrixCodeType: 3x3;"
+        renderer="colorManagement: true; physicallyCorrectLights: true; logarithmicDepthBuffer: true;"
         vr-mode-ui="enabled: false"
         device-orientation-permission-ui="enabled: false">
         
@@ -160,113 +262,150 @@
             <a-asset-item id="chessModel" src="assets/chess_scene.glb"></a-asset-item>
         </a-assets>
 
-        <a-camera position="0 0 0" look-controls="enabled: false" cursor="fuse: false; rayOrigin: mouse;" raycaster="far: 10000; objects: .clickable"></a-camera>
+        <a-camera gps-camera rotation-reader look-controls="enabled: false"></a-camera>
 
-        <a-entity mindar-image-target="targetIndex: 0">
+        <a-entity id="chess-container" visible="false">
             <a-gltf-model
                 id="chess-scene"
                 src="#chessModel"
                 position="0 0 0"
                 rotation="0 0 0"
-                scale="1 1 1"
-                animation-mixer="clip: *"
-                visible="true">
+                scale="0.5 0.5 0.5"
+                animation-mixer="clip: *">
             </a-gltf-model>
             
-            <!-- Luci per illuminare la scena -->
-            <a-light type="ambient" intensity="0.5"></a-light>
-            <a-light type="directional" position="1 2 1" intensity="0.8"></a-light>
-            <a-light type="point" position="0 1 0" intensity="0.3"></a-light>
+            <a-light type="ambient" intensity="0.6"></a-light>
+            <a-light type="directional" position="2 4 2" intensity="0.8" cast-shadow="true"></a-light>
+            <a-light type="point" position="0 2 0" intensity="0.4"></a-light>
         </a-entity>
     </a-scene>
 
     <script>
-        const sceneEl = document.querySelector('a-scene');
+        let arReady = false;
+        let objectPlaced = false;
+        let isRotating = false;
+        
+        const splashScreen = document.getElementById('splash-screen');
         const loadingScreen = document.getElementById('loading-screen');
-        const statusDot = document.getElementById('status-dot');
-        const statusText = document.getElementById('status-text');
+        const instructions = document.getElementById('instructions');
+        const placementIndicator = document.getElementById('placement-indicator');
+        const placeButton = document.getElementById('place-button');
+        const controls = document.getElementById('controls');
+        const startButton = document.getElementById('start-ar-button');
+        const chessContainer = document.getElementById('chess-container');
+        const scene = document.querySelector('a-scene');
+        const camera = document.querySelector('a-camera');
         
-        // Genera un marker semplice
-        function generateMarker() {
-            const canvas = document.getElementById('marker-canvas');
-            const ctx = canvas.getContext('2d');
-            const size = 200;
+        // Avvio AR
+        startButton.addEventListener('click', async () => {
+            splashScreen.classList.add('hidden');
+            loadingScreen.classList.add('active');
             
-            // Sfondo bianco
-            ctx.fillStyle = 'white';
-            ctx.fillRect(0, 0, size, size);
-            
-            // Bordo nero
-            ctx.fillStyle = 'black';
-            ctx.fillRect(0, 0, size, 20);
-            ctx.fillRect(0, 0, 20, size);
-            ctx.fillRect(size-20, 0, 20, size);
-            ctx.fillRect(0, size-20, size, 20);
-            
-            // Pattern centrale (QR-like)
-            const patterns = [
-                [30, 30, 40, 40],
-                [130, 30, 40, 40],
-                [30, 130, 40, 40],
-                [80, 80, 40, 40],
-                [50, 80, 20, 20],
-                [80, 50, 20, 20],
-                [110, 80, 20, 20],
-                [80, 110, 20, 20]
-            ];
-            
-            patterns.forEach(([x, y, w, h]) => {
-                ctx.fillRect(x, y, w, h);
-            });
-        }
-        
-        function downloadMarker() {
-            const canvas = document.getElementById('marker-canvas');
-            const link = document.createElement('a');
-            link.download = 'ar-marker.png';
-            link.href = canvas.toDataURL();
-            link.click();
-        }
-        
-        // Inizializza il marker canvas
-        generateMarker();
-        
-        // Gestione eventi AR
-        sceneEl.addEventListener('loaded', () => {
-            setTimeout(() => {
-                loadingScreen.classList.add('hidden');
-            }, 1000);
-            
-            const arSystem = sceneEl.systems['mindar-image-system'];
-            arSystem.start();
-        });
-        
-        // Tracciamento del marker
-        const target = document.querySelector('[mindar-image-target]');
-        
-        target.addEventListener('targetFound', () => {
-            statusDot.classList.add('active');
-            statusText.textContent = 'Marker rilevato!';
-            console.log('Marker trovato');
-        });
-        
-        target.addEventListener('targetLost', () => {
-            statusDot.classList.remove('active');
-            statusText.textContent = 'Cerca il marker';
-            console.log('Marker perso');
-        });
-        
-        // Gestione errori
-        window.addEventListener('error', (e) => {
-            console.error('Errore:', e.message);
-            if (e.message.includes('assets/chess_scene.glb')) {
-                statusText.textContent = 'Errore caricamento modello';
+            try {
+                // Richiedi permessi camera
+                const stream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { 
+                        facingMode: 'environment',
+                        width: { ideal: 1280 },
+                        height: { ideal: 720 }
+                    } 
+                });
+                
+                // Permesso ottenuto
+                console.log('Permesso camera ottenuto');
+                
+                setTimeout(() => {
+                    loadingScreen.classList.remove('active');
+                    setTimeout(() => splashScreen.style.display = 'none', 500);
+                    instructions.classList.add('visible');
+                    placementIndicator.classList.add('visible');
+                    placeButton.classList.add('visible');
+                    arReady = true;
+                }, 2000);
+                
+            } catch (error) {
+                console.error('Errore accesso camera:', error);
+                loadingScreen.querySelector('.loading-text').textContent = 
+                    'Errore: permesso camera negato';
             }
         });
         
-        // Debug info
-        console.log('AR Experience inizializzata');
-        console.log('Assicurati che il file assets/chess_scene.glb sia accessibile');
+        // Posizionamento oggetto
+        placeButton.addEventListener('click', () => {
+            if (!arReady || objectPlaced) return;
+            
+            const cameraPosition = camera.getAttribute('position');
+            const cameraRotation = camera.getAttribute('rotation');
+            
+            // Calcola posizione davanti alla camera
+            const distance = 1.5;
+            const radians = (cameraRotation.y * Math.PI) / 180;
+            
+            const x = cameraPosition.x - Math.sin(radians) * distance;
+            const y = cameraPosition.y - 0.5;
+            const z = cameraPosition.z - Math.cos(radians) * distance;
+            
+            chessContainer.setAttribute('position', `${x} ${y} ${z}`);
+            chessContainer.setAttribute('rotation', `0 ${cameraRotation.y} 0`);
+            chessContainer.setAttribute('visible', 'true');
+            
+            objectPlaced = true;
+            placeButton.textContent = 'Scacchiera Posizionata!';
+            placeButton.style.background = '#ffaa00';
+            
+            setTimeout(() => {
+                placeButton.classList.remove('visible');
+                placementIndicator.classList.remove('visible');
+                instructions.textContent = 'Usa i controlli per regolare la posizione';
+                controls.classList.add('visible');
+            }, 1500);
+        });
+        
+        // Reset posizione
+        window.resetPosition = () => {
+            objectPlaced = false;
+            chessContainer.setAttribute('visible', 'false');
+            placeButton.textContent = 'Posiziona Scacchiera';
+            placeButton.style.background = '#44ff44';
+            placeButton.classList.add('visible');
+            placementIndicator.classList.add('visible');
+            instructions.textContent = 'Muovi il dispositivo e tocca per posizionare';
+        };
+        
+        // Toggle rotazione
+        window.toggleRotation = () => {
+            isRotating = !isRotating;
+            const chessModel = document.getElementById('chess-scene');
+            
+            if (isRotating) {
+                chessModel.setAttribute('animation', {
+                    property: 'rotation',
+                    to: '0 360 0',
+                    loop: true,
+                    dur: 10000,
+                    easing: 'linear'
+                });
+                document.querySelector('#controls .control-button:last-child').textContent = 'Stop Rotazione';
+            } else {
+                chessModel.removeAttribute('animation');
+                document.querySelector('#controls .control-button:last-child').textContent = 'Ruota';
+            }
+        };
+        
+        // Gestione errori caricamento modello
+        scene.addEventListener('loaded', () => {
+            console.log('Scena AR caricata');
+        });
+        
+        window.addEventListener('error', (e) => {
+            if (e.message.includes('chess_scene.glb')) {
+                console.error('Errore caricamento modello 3D');
+                instructions.textContent = 'Errore: verifica il path del file GLB';
+                instructions.style.background = 'rgba(255, 68, 68, 0.9)';
+            }
+        });
+        
+        console.log('Sistema AR inizializzato. In attesa di avvio...');
     </script>
 </body>
 </html>
