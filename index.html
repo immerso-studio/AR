@@ -1,437 +1,566 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Museum AR - Galleria Virtuale</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Model Viewer per AR -->
-    <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.3.0/model-viewer.min.js"></script>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
-            color: #e2e8f0;
-            overflow-x: hidden;
-            min-height: 100vh;
-        }
-        
-        .transition-all {
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        
-        .glass {
-            background: rgba(255, 255, 255, 0.08);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        
-        .gradient-text {
-            background: linear-gradient(135deg, #f0abfc 0%, #a78bfa 50%, #818cf8 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-        
-        .btn-hover {
-            background: linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%);
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .btn-hover::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-            transition: 0.5s;
-        }
-        
-        .btn-hover:hover::after {
-            left: 100%;
-        }
-        
-        .art-card {
-            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.4s ease;
-            transform-origin: center;
-        }
-        
-        .art-card:hover {
-            transform: translateY(-4px) scale(1.02);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
-        }
-        
-        model-viewer {
-            width: 100%;
-            height: 100vh;
-            background: transparent;
-        }
-        
-        .ar-button {
-            background: linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%);
-            color: white;
-            border-radius: 50px;
-            padding: 14px 32px;
-            font-weight: 500;
-            letter-spacing: 0.5px;
-            border: none;
-            font-size: 1rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-        
-        .ar-button:hover {
-            transform: scale(1.05);
-            box-shadow: 0 10px 20px rgba(139, 92, 246, 0.3);
-        }
-        
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-        
-        ::-webkit-scrollbar-track {
-            background: rgba(255, 255, 255, 0.05);
-        }
-        
-        ::-webkit-scrollbar-thumb {
-            background: linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%);
-            border-radius: 4px;
-        }
-        
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        
-        @keyframes float {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-10px); }
-        }
-        
-        .animate-fadeInUp {
-            animation: fadeInUp 0.6s ease-out;
-        }
-        
-        .animate-float {
-            animation: float 3s ease-in-out infinite;
-        }
-        
-        @supports (-webkit-touch-callout: none) {
-            .h-screen {
-                height: -webkit-fill-available;
-            }
-        }
-        
-        .android-green {
-            background: linear-gradient(135deg, #3DDC84 0%, #34A853 100%);
-        }
-        
-        .android-green-text {
-            color: #3DDC84;
-        }
-        
-        .android-bg {
-            background: linear-gradient(135deg, #3DDC8420 0%, #34A85320 100%);
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#0a0a0a" />
+  <title>SEDIA — AR Viewer</title>
+
+  <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Geist+Mono:wght@300;400&display=swap');
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --cream: #f5f0e8;
+      --dark: #0e0d0b;
+      --muted: rgba(245, 240, 232, 0.45);
+      --glass-bg: rgba(14, 13, 11, 0.55);
+      --glass-border: rgba(245, 240, 232, 0.12);
+      --accent: #c8a96e;
+      --accent-dim: rgba(200, 169, 110, 0.3);
+    }
+
+    html, body {
+      width: 100%; height: 100%;
+      overflow: hidden;
+      background: #0a0a0a;
+      font-family: 'Geist Mono', monospace;
+      color: var(--cream);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── Model Viewer ── */
+    model-viewer {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      background: transparent;
+      --poster-color: transparent;
+    }
+
+    model-viewer::part(default-ar-button) { display: none; }
+
+    /* ── Background gradient ── */
+    .bg-gradient {
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 80% 60% at 50% 0%, rgba(200,169,110,0.08) 0%, transparent 70%),
+        radial-gradient(ellipse 60% 40% at 80% 80%, rgba(14,13,11,0.9) 0%, rgba(10,10,10,0.97) 100%);
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    /* ── Top bar ── */
+    .top-bar {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 10;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: env(safe-area-inset-top, 16px) 24px 16px;
+      padding-top: max(env(safe-area-inset-top), 16px);
+    }
+
+    .brand {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(18px, 4vw, 24px);
+      font-weight: 300;
+      letter-spacing: 0.18em;
+      color: var(--cream);
+      text-transform: uppercase;
+    }
+
+    .brand span {
+      color: var(--accent);
+    }
+
+    .tag {
+      font-size: 10px;
+      letter-spacing: 0.2em;
+      color: rgba(245,240,232,0.4);
+      text-transform: uppercase;
+      border: 0.5px solid var(--glass-border);
+      padding: 5px 10px;
+      border-radius: 2px;
+    }
+
+    /* ── AR Button ── */
+    .ar-launch-btn {
+      position: fixed;
+      bottom: 120px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 20;
+      background: var(--accent);
+      color: #0a0a0a;
+      border: none;
+      padding: 14px 32px;
+      font-family: 'Geist Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      cursor: pointer;
+      border-radius: 2px;
+      white-space: nowrap;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transition: opacity 0.2s, transform 0.2s;
+      box-shadow: 0 0 40px rgba(200,169,110,0.2);
+    }
+
+    .ar-launch-btn:active { transform: translateX(-50%) scale(0.97); }
+    .ar-launch-btn.hidden { display: none; }
+
+    .ar-icon {
+      width: 16px; height: 16px;
+      flex-shrink: 0;
+    }
+
+    /* ── Info toggle ── */
+    .info-toggle {
+      position: fixed;
+      bottom: 60px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 20;
+      background: transparent;
+      border: 0.5px solid var(--glass-border);
+      color: rgba(245,240,232,0.6);
+      padding: 10px 24px;
+      font-family: 'Geist Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      cursor: pointer;
+      border-radius: 2px;
+      white-space: nowrap;
+      transition: all 0.2s;
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+    }
+
+    .info-toggle:hover,
+    .info-toggle.active {
+      color: var(--cream);
+      border-color: rgba(245,240,232,0.3);
+    }
+
+    /* ── Info panel (glass frosted) ── */
+    .info-panel {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      z-index: 30;
+      background: var(--glass-bg);
+      backdrop-filter: blur(24px) saturate(180%);
+      -webkit-backdrop-filter: blur(24px) saturate(180%);
+      border-top: 0.5px solid var(--glass-border);
+      padding: 32px 28px;
+      padding-bottom: max(env(safe-area-inset-bottom), 28px);
+      transform: translateY(100%);
+      transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+      will-change: transform;
+    }
+
+    .info-panel.open {
+      transform: translateY(0);
+    }
+
+    .panel-drag {
+      width: 36px; height: 3px;
+      background: rgba(245,240,232,0.2);
+      border-radius: 2px;
+      margin: 0 auto 28px;
+    }
+
+    .product-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 24px;
+    }
+
+    .product-name {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(26px, 7vw, 38px);
+      font-weight: 300;
+      line-height: 1.1;
+      color: var(--cream);
+    }
+
+    .product-name em {
+      font-style: italic;
+      color: var(--accent);
+    }
+
+    .product-price {
+      font-family: 'Geist Mono', monospace;
+      font-size: 13px;
+      color: var(--accent);
+      letter-spacing: 0.05em;
+      margin-top: 4px;
+    }
+
+    .badge {
+      background: var(--accent-dim);
+      color: var(--accent);
+      font-size: 9px;
+      letter-spacing: 0.2em;
+      padding: 5px 10px;
+      border-radius: 2px;
+      text-transform: uppercase;
+      flex-shrink: 0;
+      margin-top: 4px;
+    }
+
+    /* Separator */
+    .sep {
+      height: 0.5px;
+      background: var(--glass-border);
+      margin: 0 0 20px;
+    }
+
+    .product-desc {
+      font-size: 13px;
+      line-height: 1.75;
+      color: rgba(245,240,232,0.6);
+      margin-bottom: 22px;
+      font-style: italic;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 16px;
+    }
+
+    /* Specs grid */
+    .specs {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-bottom: 24px;
+    }
+
+    .spec-item {
+      border-left: 1px solid var(--accent-dim);
+      padding-left: 12px;
+    }
+
+    .spec-label {
+      font-size: 9px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: rgba(245,240,232,0.35);
+      margin-bottom: 3px;
+    }
+
+    .spec-value {
+      font-size: 12px;
+      color: var(--cream);
+      letter-spacing: 0.05em;
+    }
+
+    /* Materials */
+    .materials {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .material-chip {
+      background: rgba(245,240,232,0.06);
+      border: 0.5px solid var(--glass-border);
+      color: rgba(245,240,232,0.55);
+      font-size: 9px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      padding: 6px 12px;
+      border-radius: 2px;
+    }
+
+    /* Close button inside panel */
+    .panel-close {
+      position: absolute;
+      top: 20px; right: 20px;
+      background: transparent;
+      border: none;
+      color: rgba(245,240,232,0.4);
+      font-size: 20px;
+      cursor: pointer;
+      line-height: 1;
+      padding: 4px;
+    }
+
+    /* ── No AR fallback ── */
+    .no-ar-note {
+      position: fixed;
+      bottom: 70px;
+      left: 50%; transform: translateX(-50%);
+      z-index: 20;
+      font-size: 10px;
+      color: rgba(245,240,232,0.3);
+      letter-spacing: 0.12em;
+      text-align: center;
+      white-space: nowrap;
+    }
+
+    /* ── Rotate hint ── */
+    .hint {
+      position: fixed;
+      bottom: 28px;
+      right: 24px;
+      z-index: 20;
+      font-size: 9px;
+      letter-spacing: 0.15em;
+      color: rgba(245,240,232,0.25);
+      text-transform: uppercase;
+      writing-mode: vertical-rl;
+    }
+
+    /* ── Loading overlay ── */
+    .loading-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 50;
+      background: #0a0a0a;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+      transition: opacity 0.6s ease;
+    }
+
+    .loading-overlay.fade-out {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .loader-brand {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 28px;
+      font-weight: 300;
+      letter-spacing: 0.25em;
+      color: var(--cream);
+      text-transform: uppercase;
+    }
+
+    .loader-line {
+      width: 80px;
+      height: 0.5px;
+      background: rgba(245,240,232,0.15);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .loader-progress {
+      position: absolute;
+      top: 0; left: -100%;
+      width: 100%; height: 100%;
+      background: var(--accent);
+      animation: load 1.6s ease infinite;
+    }
+
+    @keyframes load {
+      0% { left: -100%; }
+      100% { left: 100%; }
+    }
+
+    .loader-text {
+      font-size: 9px;
+      letter-spacing: 0.2em;
+      color: rgba(245,240,232,0.3);
+      text-transform: uppercase;
+    }
+  </style>
 </head>
-<body class="min-h-screen">
-    <!-- Schermata Home -->
-    <div id="homeScreen" class="min-h-screen">
-        <div class="container mx-auto px-4 py-8">
-            <!-- Header -->
-            <header class="text-center mb-16 animate-fadeInUp">
-                <div class="mb-8">
-                    <div class="w-20 h-20 mx-auto mb-6 flex items-center justify-center rounded-full bg-gradient-to-br from-pink-500/20 to-purple-500/20 animate-float">
-                        <svg class="w-10 h-10 text-purple-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/>
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/>
-                        </svg>
-                    </div>
-                    <h1 class="text-5xl font-bold mb-4 gradient-text">Museum AR</h1>
-                    <p class="text-xl text-slate-300">Galleria d'Arte in Realtà Aumentata</p>
-                </div>
-            </header>
+<body>
 
-            <!-- Collezione -->
-            <div class="max-w-4xl mx-auto animate-fadeInUp" style="animation-delay: 0.1s">
-                <h2 class="text-2xl font-semibold text-white mb-8 text-center">Collezione</h2>
-                
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    <!-- Opera 1: Android -->
-                    <div class="art-card glass rounded-2xl p-8">
-                        <div class="mb-6">
-                            <div class="w-full h-48 rounded-xl mb-6 flex items-center justify-center android-bg">
-                                <div class="w-32 h-32 relative flex items-center justify-center">
-                                    <!-- Icona Android -->
-                                    <svg viewBox="0 0 24 24" class="w-32 h-32 android-green-text">
-                                        <path fill="currentColor" d="M6 18c0 .55.45 1 1 1h1v3.5c0 .83.67 1.5 1.5 1.5s1.5-.67 1.5-1.5V19h2v3.5c0 .83.67 1.5 1.5 1.5s1.5-.67 1.5-1.5V19h1c.55 0 1-.45 1-1V8H6v10zM3.5 8C2.67 8 2 8.67 2 9.5v7c0 .83.67 1.5 1.5 1.5S5 17.33 5 16.5v-7C5 8.67 4.33 8 3.5 8zm17 0c-.83 0-1.5.67-1.5 1.5v7c0 .83.67 1.5 1.5 1.5s1.5-.67 1.5-1.5v-7c0-.83-.67-1.5-1.5-1.5zm-4.97-5.84l1.3-1.3c.2-.2.2-.51 0-.71-.2-.2-.51-.2-.71 0l-1.48 1.48C13.85 1.23 12.95 1 12 1c-.96 0-1.86.23-2.66.63L7.85.15c-.2-.2-.51-.2-.71 0-.2.2-.2.51 0 .71l1.31 1.31C6.97 3.26 6 5.01 6 7h12c0-1.99-.97-3.75-2.47-4.84zM10 5H9V4h1v1zm5 0h-1V4h1v1z"/>
-                                    </svg>
-                                </div>
-                            </div>
-                            <div class="flex items-center gap-3 mb-3">
-                                <span class="px-3 py-1 rounded-full text-xs font-medium android-bg android-green-text">
-                                    Tecnologia
-                                </span>
-                                <span class="text-sm text-slate-400">2023</span>
-                            </div>
-                            <h3 class="text-xl font-semibold text-white mb-2">Android</h3>
-                            <p class="text-slate-300 mb-1">Google</p>
-                            <p class="text-slate-400 text-sm leading-relaxed">
-                                Il celebre robot verde di Android, icona dell'innovazione mobile. Un'opera che rappresenta l'evoluzione della tecnologia e della connettività moderna.
-                            </p>
-                        </div>
-                        <button onclick="viewArtworkAR(1)" 
-                                class="btn-hover text-white w-full py-4 rounded-full font-medium transition-all hover:shadow-lg">
-                            <span class="flex items-center justify-center gap-3">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/>
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/>
-                                </svg>
-                                Visualizza in AR
-                            </span>
-                        </button>
-                    </div>
+  <!-- Loading overlay -->
+  <div class="loading-overlay" id="loadingOverlay">
+    <div class="loader-brand">Forma</div>
+    <div class="loader-line"><div class="loader-progress"></div></div>
+    <div class="loader-text">Caricamento modello</div>
+  </div>
 
-                    <!-- Opera 2: Sfera -->
-                    <div class="art-card glass rounded-2xl p-8">
-                        <div class="mb-6">
-                            <div class="w-full h-48 rounded-xl mb-6 flex items-center justify-center" 
-                                 style="background: linear-gradient(135deg, #3498db20 0%, #2980b920 100%)">
-                                <div class="w-32 h-32 rounded-full" 
-                                     style="background: linear-gradient(135deg, #3498db 0%, #2980b9 100%); 
-                                            box-shadow: 0 20px 40px rgba(52, 152, 219, 0.3);">
-                                </div>
-                            </div>
-                            <div class="flex items-center gap-3 mb-3">
-                                <span class="px-3 py-1 rounded-full text-xs font-medium" 
-                                      style="background: linear-gradient(135deg, #3498db20 0%, #2980b920 100%); color: #3498db">
-                                    Astratta
-                                </span>
-                                <span class="text-sm text-slate-400">2022</span>
-                            </div>
-                            <h3 class="text-xl font-semibold text-white mb-2">Sfera Celeste</h3>
-                            <p class="text-slate-300 mb-1">Maria Bianchi</p>
-                            <p class="text-slate-400 text-sm leading-relaxed">
-                                Ispirata ai corpi celesti e all'infinito dello spazio cosmico, questa sfera riflette l'armonia dell'universo attraverso una superficie perfettamente levigata.
-                            </p>
-                        </div>
-                        <button onclick="viewArtworkAR(2)" 
-                                class="btn-hover text-white w-full py-4 rounded-full font-medium transition-all hover:shadow-lg">
-                            <span class="flex items-center justify-center gap-3">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/>
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/>
-                                </svg>
-                                Visualizza in AR
-                            </span>
-                        </button>
-                    </div>
-                </div>
-            </div>
+  <!-- Background -->
+  <div class="bg-gradient"></div>
 
-            <!-- Footer -->
-            <footer class="mt-20 text-center text-slate-500 text-sm animate-fadeInUp" style="animation-delay: 0.2s">
-                <p>Per la migliore esperienza, usa un dispositivo mobile con AR supportata</p>
-            </footer>
-        </div>
+  <!-- Model Viewer -->
+  <model-viewer
+    id="viewer"
+    src="chair.glb"
+    alt="Sedia di design"
+    ar
+    ar-modes="webxr scene-viewer quick-look"
+    ar-scale="auto"
+    camera-controls
+    auto-rotate
+    auto-rotate-delay="2000"
+    rotation-per-second="8deg"
+    camera-orbit="0deg 75deg 2.5m"
+    min-camera-orbit="auto auto 0.5m"
+    max-camera-orbit="auto auto 5m"
+    shadow-intensity="0.8"
+    shadow-softness="0.8"
+    exposure="1.1"
+    environment-image="neutral"
+    style="background: radial-gradient(ellipse at 40% 30%, #1a1812 0%, #0a0a0a 70%);"
+    loading="eager"
+  >
+    <!-- Custom slot for AR button -->
+    <button slot="ar-button" class="ar-launch-btn" id="arBtn">
+      <svg class="ar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+        <path d="M2 17l10 5 10-5"/>
+        <path d="M2 12l10 5 10-5"/>
+      </svg>
+      Visualizza in AR
+    </button>
+  </model-viewer>
+
+  <!-- Top bar -->
+  <header class="top-bar">
+    <div class="brand">Forma <span>Studio</span></div>
+    <div class="tag">AR · 3D</div>
+  </header>
+
+  <!-- Info toggle button -->
+  <button class="info-toggle" id="infoToggle">↑ Info prodotto</button>
+
+  <!-- Rotate hint -->
+  <div class="hint">Ruota · Pinch</div>
+
+  <!-- Info panel (glass frosted) -->
+  <div class="info-panel" id="infoPanel">
+    <div class="panel-drag"></div>
+    <button class="panel-close" id="panelClose">×</button>
+
+    <div class="product-header">
+      <div>
+        <div class="product-name">Sedia <em>Arco</em></div>
+        <div class="product-price">€ 1.290</div>
+      </div>
+      <div class="badge">Nuova</div>
     </div>
 
-    <script>
-        const artworks = {
-            1: {
-                name: "Android",
-                author: "Google",
-                year: "2023",
-                description: "Il celebre robot verde di Android, icona dell'innovazione mobile e della tecnologia moderna.",
-                color: "#3DDC84",
-                glb: "assets/chess_scene.glb"
-            },
-            2: {
-                name: "Sfera Celeste",
-                author: "Maria Bianchi",
-                year: "2022",
-                description: "Ispirata ai corpi celesti e all'infinito dello spazio cosmico.",
-                color: "#3498db",
-                glb: "https://modelviewer.dev/shared-assets/models/reflective-sphere.gltf"
-            }
-        };
+    <div class="sep"></div>
 
-        function viewArtworkAR(artworkId) {
-            const artwork = artworks[artworkId];
-            
-            // Crea viewer per l'opera
-            const viewer = document.createElement('model-viewer');
-            viewer.setAttribute('camera-controls', '');
-            viewer.setAttribute('touch-action', 'pan-y');
-            viewer.setAttribute('ar', '');
-            viewer.setAttribute('ar-modes', 'webxr scene-viewer quick-look');
-            viewer.setAttribute('ar-scale', 'auto');
-            viewer.setAttribute('auto-rotate', '');
-            viewer.setAttribute('shadow-intensity', '1');
-            viewer.setAttribute('exposure', '1');
-            viewer.setAttribute('environment-image', 'neutral');
-            viewer.style.cssText = `
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100vw;
-                height: 100vh;
-                z-index: 9999;
-                background: #0f172a;
-            `;
-            
-            // Imposta modello
-            viewer.setAttribute('src', artwork.glb);
-            viewer.setAttribute('alt', artwork.name);
-            
-            // Pulsante AR
-            const arButton = document.createElement('button');
-            arButton.setAttribute('slot', 'ar-button');
-            arButton.className = 'ar-button';
-            arButton.style.cssText = `
-                position: absolute;
-                bottom: 120px;
-                left: 50%;
-                transform: translateX(-50%);
-                z-index: 10;
-                display: flex;
-                align-items: center;
-                gap: 8px;
-            `;
-            arButton.innerHTML = `
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/>
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/>
-                </svg>
-                Visualizza in AR
-            `;
-            
-            // Header info
-            const header = document.createElement('div');
-            header.style.cssText = `
-                position: absolute;
-                top: 0;
-                left: 0;
-                right: 0;
-                background: linear-gradient(180deg, rgba(15,23,42,0.95) 0%, transparent 100%);
-                padding: 24px;
-                z-index: 10;
-            `;
-            header.innerHTML = `
-                <div class="max-w-3xl mx-auto">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <h2 class="text-xl font-semibold text-white mb-1">${artwork.name}</h2>
-                            <p class="text-slate-300 text-sm">${artwork.author} • ${artwork.year}</p>
-                        </div>
-                        <button id="closeAR" class="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-all">
-                            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                            </svg>
-                        </button>
-                    </div>
-                </div>
-            `;
-            
-            viewer.appendChild(arButton);
-            viewer.appendChild(header);
-            document.body.appendChild(viewer);
-            
-            // Chiudi AR viewer
-            document.getElementById('closeAR').onclick = () => {
-                document.body.removeChild(viewer);
-            };
-            
-            // Gestione errore nel caricamento del modello
-            viewer.addEventListener('error', (event) => {
-                console.error('Errore nel caricamento del modello:', event.detail);
-                showNotification('Errore nel caricamento del modello 3D. Controlla che il file assets/android.glb esista.');
-            });
-            
-            // Controlla se il modello viene caricato
-            viewer.addEventListener('load', () => {
-                console.log('Modello caricato con successo');
-            });
-        }
+    <p class="product-desc">
+      Una sedia che dialoga con lo spazio. Struttura a sbalzo in frassino massello, seduta a guscio in cuoio naturale. Disegno senza tempo, pensato per durare.
+    </p>
 
-        // Notifica iniziale
-        window.addEventListener('load', () => {
-            setTimeout(() => {
-                const notification = document.createElement('div');
-                notification.innerHTML = `
-                    <div style="
-                        position: fixed;
-                        top: 24px;
-                        left: 50%;
-                        transform: translateX(-50%);
-                        background: linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%);
-                        color: white;
-                        padding: 12px 24px;
-                        border-radius: 12px;
-                        z-index: 10000;
-                        max-width: 90%;
-                        text-align: center;
-                        font-size: 0.875rem;
-                        animation: fadeInUp 0.3s ease-out;
-                        box-shadow: 0 10px 25px rgba(139, 92, 246, 0.2);
-                        backdrop-filter: blur(10px);
-                        border: 1px solid rgba(255,255,255,0.1);
-                    ">
-                        👋 Seleziona un'opera per iniziare l'esperienza AR
-                    </div>
-                `;
-                document.body.appendChild(notification);
-                setTimeout(() => {
-                    notification.style.opacity = '0';
-                    notification.style.transform = 'translateX(-50%) translateY(-10px)';
-                    setTimeout(() => notification.remove(), 300);
-                }, 3000);
-            }, 1000);
-        });
+    <div class="specs">
+      <div class="spec-item">
+        <div class="spec-label">Altezza</div>
+        <div class="spec-value">82 cm</div>
+      </div>
+      <div class="spec-item">
+        <div class="spec-label">Larghezza</div>
+        <div class="spec-value">54 cm</div>
+      </div>
+      <div class="spec-item">
+        <div class="spec-label">Profondità</div>
+        <div class="spec-value">58 cm</div>
+      </div>
+      <div class="spec-item">
+        <div class="spec-label">Peso</div>
+        <div class="spec-value">6,4 kg</div>
+      </div>
+      <div class="spec-item">
+        <div class="spec-label">Portata</div>
+        <div class="spec-value">120 kg</div>
+      </div>
+      <div class="spec-item">
+        <div class="spec-label">Designer</div>
+        <div class="spec-value">M. Ferretti</div>
+      </div>
+    </div>
 
-        function showNotification(message) {
-            const notification = document.createElement('div');
-            notification.textContent = message;
-            notification.style.cssText = `
-                position: fixed;
-                top: 24px;
-                left: 50%;
-                transform: translateX(-50%);
-                background: rgba(239, 68, 68, 0.9);
-                color: white;
-                padding: 12px 24px;
-                border-radius: 12px;
-                z-index: 10000;
-                max-width: 90%;
-                text-align: center;
-                font-size: 0.875rem;
-                animation: fadeInUp 0.3s ease-out;
-                box-shadow: 0 10px 25px rgba(239, 68, 68, 0.2);
-                backdrop-filter: blur(10px);
-            `;
-            document.body.appendChild(notification);
-            setTimeout(() => {
-                notification.style.opacity = '0';
-                notification.style.transform = 'translateX(-50%) translateY(-10px)';
-                setTimeout(() => notification.remove(), 300);
-            }, 4000);
-        }
-    </script>
+    <div class="materials">
+      <span class="material-chip">Frassino massello</span>
+      <span class="material-chip">Cuoio naturale</span>
+      <span class="material-chip">Made in Italy</span>
+      <span class="material-chip">FSC certificato</span>
+    </div>
+  </div>
+
+  <script>
+    const overlay = document.getElementById('loadingOverlay');
+    const viewer = document.getElementById('viewer');
+    const infoToggle = document.getElementById('infoToggle');
+    const infoPanel = document.getElementById('infoPanel');
+    const panelClose = document.getElementById('panelClose');
+
+    // Hide loading overlay when model is ready
+    viewer.addEventListener('load', () => {
+      setTimeout(() => {
+        overlay.classList.add('fade-out');
+        setTimeout(() => overlay.style.display = 'none', 700);
+      }, 400);
+    });
+
+    // Fallback if model fails (placeholder cube will still show)
+    viewer.addEventListener('error', () => {
+      overlay.classList.add('fade-out');
+      setTimeout(() => overlay.style.display = 'none', 700);
+    });
+
+    // Fallback timer in case events don't fire
+    setTimeout(() => {
+      if (!overlay.classList.contains('fade-out')) {
+        overlay.classList.add('fade-out');
+        setTimeout(() => overlay.style.display = 'none', 700);
+      }
+    }, 5000);
+
+    // Info panel toggle
+    let panelOpen = false;
+    function openPanel() {
+      panelOpen = true;
+      infoPanel.classList.add('open');
+      infoToggle.classList.add('active');
+      infoToggle.textContent = '↓ Chiudi';
+    }
+    function closePanel() {
+      panelOpen = false;
+      infoPanel.classList.remove('open');
+      infoToggle.classList.remove('active');
+      infoToggle.textContent = '↑ Info prodotto';
+    }
+
+    infoToggle.addEventListener('click', () => {
+      panelOpen ? closePanel() : openPanel();
+    });
+    panelClose.addEventListener('click', closePanel);
+
+    // Touch drag to close panel
+    let touchStartY = 0;
+    infoPanel.addEventListener('touchstart', e => { touchStartY = e.touches[0].clientY; }, { passive: true });
+    infoPanel.addEventListener('touchend', e => {
+      const delta = e.changedTouches[0].clientY - touchStartY;
+      if (delta > 60) closePanel();
+    }, { passive: true });
+
+    // AR availability check
+    viewer.addEventListener('ar-status', e => {
+      if (e.detail.status === 'not-presenting') {
+        // AR session ended
+      }
+    });
+
+    // Check if AR is supported and show appropriate message
+    customElements.whenDefined('model-viewer').then(() => {
+      if (!viewer.canActivateAR) {
+        const note = document.createElement('div');
+        note.className = 'no-ar-note';
+        note.textContent = 'AR non disponibile su questo dispositivo';
+        document.body.appendChild(note);
+      }
+    });
+  </script>
 </body>
 </html>
