@@ -118,6 +118,13 @@
     .ar-launch-btn:active { transform: translateX(-50%) scale(0.97); }
     .ar-launch-btn.hidden { display: none; }
 
+    /* Hide AR button on desktop devices */
+    @media (hover: hover) and (pointer: fine) {
+      .ar-launch-btn {
+        display: none !important;
+      }
+    }
+
     .ar-icon {
       width: 16px; height: 16px;
       flex-shrink: 0;
@@ -397,6 +404,7 @@
     alt="Sedia Arco - Design Contemporaneo"
     ar
     ar-modes="webxr scene-viewer quick-look"
+    ar-placement="floor"
     ar-scale="auto"
     camera-controls
     auto-rotate
@@ -405,11 +413,11 @@
     camera-orbit="0deg 75deg 2.5m"
     min-camera-orbit="auto auto 0.5m"
     max-camera-orbit="auto auto 5m"
-    shadow-intensity="0.8"
-    shadow-softness="0.8"
-    exposure="1.1"
+    shadow-intensity="1.2"
+    shadow-softness="1"
+    exposure="1.8"
     environment-image="neutral"
-    style="background: radial-gradient(ellipse at 40% 30%, #1a1812 0%, #0a0a0a 70%);"
+    style="background: radial-gradient(ellipse at 50% 40%, #2a2720 0%, #0a0a0a 80%);"
     loading="eager"
   >
     <!-- Custom slot for AR button -->
@@ -555,6 +563,10 @@
 
     // Robust AR availability check
     customElements.whenDefined('model-viewer').then(() => {
+      // Prevent AR support messages from appearing on desktop
+      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+      if (!isMobile) return;
+
       // Check for AR support with a small delay to allow initialization
       setTimeout(() => {
         if (!viewer.canActivateAR) {
