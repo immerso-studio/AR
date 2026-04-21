@@ -392,8 +392,9 @@
   <!-- Model Viewer -->
   <model-viewer
     id="viewer"
-    src="chair.glb"
-    alt="Sedia di design"
+    src="assets/sedia-arco.glb"
+    ios-src="assets/sedia-arco.glb"
+    alt="Sedia Arco - Design Contemporaneo"
     ar
     ar-modes="webxr scene-viewer quick-look"
     ar-scale="auto"
@@ -552,14 +553,22 @@
       }
     });
 
-    // Check if AR is supported and show appropriate message
+    // Robust AR availability check
     customElements.whenDefined('model-viewer').then(() => {
-      if (!viewer.canActivateAR) {
-        const note = document.createElement('div');
-        note.className = 'no-ar-note';
-        note.textContent = 'AR non disponibile su questo dispositivo';
-        document.body.appendChild(note);
-      }
+      // Check for AR support with a small delay to allow initialization
+      setTimeout(() => {
+        if (!viewer.canActivateAR) {
+          console.warn("AR not supported on this device/browser.");
+          const note = document.createElement('div');
+          note.className = 'no-ar-note';
+          note.textContent = 'AR non disponibile su questo dispositivo';
+          document.body.appendChild(note);
+          
+          // Hide the primary AR button if AR is definitely not available
+          const arBtn = document.getElementById('arBtn');
+          if (arBtn) arBtn.style.display = 'none';
+        }
+      }, 2000);
     });
   </script>
 </body>
