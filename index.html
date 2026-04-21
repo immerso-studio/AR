@@ -327,6 +327,59 @@
       writing-mode: vertical-rl;
     }
 
+    /* ── Configurator ── */
+    .configurator {
+      position: fixed;
+      top: 50%;
+      right: 24px;
+      transform: translateY(-50%);
+      z-index: 20;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      background: var(--glass-bg);
+      backdrop-filter: blur(12px) saturate(180%);
+      -webkit-backdrop-filter: blur(12px) saturate(180%);
+      border: 1px solid var(--glass-border);
+      padding: 10px;
+      border-radius: 40px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+    }
+
+    .color-swatch {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      border: 2px solid transparent;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+      position: relative;
+    }
+
+    .color-swatch::after {
+      content: '';
+      position: absolute;
+      inset: -5px;
+      border-radius: 50%;
+      border: 1px solid var(--accent);
+      opacity: 0;
+      transform: scale(0.8);
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .color-swatch.active::after {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    .color-swatch:hover {
+      transform: scale(1.1);
+    }
+
+    .swatch-light { background-color: #d9d9d9; }
+    .swatch-dark { background-color: #4d4d4d; }
+
     /* ── Loading overlay ── */
     .loading-overlay {
       position: fixed;
@@ -432,6 +485,12 @@
     <div class="brand">Forma <span>Studio</span></div>
     <div class="tag">AR · 3D</div>
   </header>
+
+  <!-- Configurator -->
+  <div class="configurator">
+    <div class="color-swatch swatch-light active" data-color="#d9d9d9" title="Grigio Chiaro"></div>
+    <div class="color-swatch swatch-dark" data-color="#4d4d4d" title="Grigio Scuro"></div>
+  </div>
 
   <!-- Info toggle button -->
   <button class="info-toggle" id="infoToggle">↑ Info prodotto</button>
@@ -577,6 +636,28 @@
           if (arBtn) arBtn.style.display = 'none';
         }
       }, 2000);
+    });
+
+    // Configurator Logic
+    const swatches = document.querySelectorAll('.color-swatch');
+    const targetedMaterials = ['pelle', 'cuciture', 'pelle ricamata'];
+
+    swatches.forEach(swatch => {
+      swatch.addEventListener('click', (e) => {
+        // Update active class
+        swatches.forEach(s => s.classList.remove('active'));
+        e.target.classList.add('active');
+
+        // Apply color
+        const colorHex = e.target.getAttribute('data-color');
+        if (viewer.model && viewer.model.materials) {
+          viewer.model.materials.forEach(material => {
+            if (targetedMaterials.includes(material.name.toLowerCase())) {
+              material.pbrMetallicRoughness.setBaseColorFactor(colorHex);
+            }
+          });
+        }
+      });
     });
   </script>
 </body>
