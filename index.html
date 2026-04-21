@@ -14,11 +14,11 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --cream: #f5f0e8;
-      --dark: #0e0d0b;
-      --muted: rgba(245, 240, 232, 0.45);
-      --glass-bg: rgba(14, 13, 11, 0.55);
-      --glass-border: rgba(245, 240, 232, 0.12);
+      --cream: #141414;
+      --dark: #fcfbf9;
+      --muted: rgba(20, 20, 20, 0.45);
+      --glass-bg: rgba(252, 251, 249, 0.55);
+      --glass-border: rgba(20, 20, 20, 0.12);
       --accent: #c8a96e;
       --accent-dim: rgba(200, 169, 110, 0.3);
     }
@@ -26,7 +26,7 @@
     html, body {
       width: 100%; height: 100%;
       overflow: hidden;
-      background: #0a0a0a;
+      background: #fcfbf9;
       font-family: 'Geist Mono', monospace;
       color: var(--cream);
       -webkit-font-smoothing: antialiased;
@@ -50,7 +50,7 @@
       inset: 0;
       background:
         radial-gradient(ellipse 80% 60% at 50% 0%, rgba(200,169,110,0.08) 0%, transparent 70%),
-        radial-gradient(ellipse 60% 40% at 80% 80%, rgba(14,13,11,0.9) 0%, rgba(10,10,10,0.97) 100%);
+        radial-gradient(ellipse 60% 40% at 80% 80%, rgba(252, 251, 249,0.9) 0%, rgba(245,244,240,0.97) 100%);
       pointer-events: none;
       z-index: 1;
     }
@@ -83,7 +83,7 @@
     .tag {
       font-size: 10px;
       letter-spacing: 0.2em;
-      color: rgba(245,240,232,0.4);
+      color: rgba(20, 20, 20,0.4);
       text-transform: uppercase;
       border: 0.5px solid var(--glass-border);
       padding: 5px 10px;
@@ -98,7 +98,7 @@
       transform: translateX(-50%);
       z-index: 20;
       background: var(--accent);
-      color: #0a0a0a;
+      color: #ffffff;
       border: none;
       padding: 14px 32px;
       font-family: 'Geist Mono', monospace;
@@ -139,7 +139,7 @@
       z-index: 20;
       background: transparent;
       border: 0.5px solid var(--glass-border);
-      color: rgba(245,240,232,0.6);
+      color: rgba(20, 20, 20,0.6);
       padding: 10px 24px;
       font-family: 'Geist Mono', monospace;
       font-size: 10px;
@@ -156,7 +156,7 @@
     .info-toggle:hover,
     .info-toggle.active {
       color: var(--cream);
-      border-color: rgba(245,240,232,0.3);
+      border-color: rgba(20, 20, 20,0.3);
     }
 
     /* ── Info panel (glass frosted) ── */
@@ -181,7 +181,7 @@
 
     .panel-drag {
       width: 36px; height: 3px;
-      background: rgba(245,240,232,0.2);
+      background: rgba(20, 20, 20,0.2);
       border-radius: 2px;
       margin: 0 auto 28px;
     }
@@ -236,7 +236,7 @@
     .product-desc {
       font-size: 13px;
       line-height: 1.75;
-      color: rgba(245,240,232,0.6);
+      color: rgba(20, 20, 20,0.6);
       margin-bottom: 22px;
       font-style: italic;
       font-family: 'Cormorant Garamond', serif;
@@ -260,7 +260,7 @@
       font-size: 9px;
       letter-spacing: 0.2em;
       text-transform: uppercase;
-      color: rgba(245,240,232,0.35);
+      color: rgba(20, 20, 20,0.35);
       margin-bottom: 3px;
     }
 
@@ -278,9 +278,9 @@
     }
 
     .material-chip {
-      background: rgba(245,240,232,0.06);
+      background: rgba(20, 20, 20,0.06);
       border: 0.5px solid var(--glass-border);
-      color: rgba(245,240,232,0.55);
+      color: rgba(20, 20, 20,0.55);
       font-size: 9px;
       letter-spacing: 0.15em;
       text-transform: uppercase;
@@ -294,7 +294,7 @@
       top: 20px; right: 20px;
       background: transparent;
       border: none;
-      color: rgba(245,240,232,0.4);
+      color: rgba(20, 20, 20,0.4);
       font-size: 20px;
       cursor: pointer;
       line-height: 1;
@@ -308,7 +308,7 @@
       left: 50%; transform: translateX(-50%);
       z-index: 20;
       font-size: 10px;
-      color: rgba(245,240,232,0.3);
+      color: rgba(20, 20, 20,0.3);
       letter-spacing: 0.12em;
       text-align: center;
       white-space: nowrap;
@@ -322,7 +322,7 @@
       z-index: 20;
       font-size: 9px;
       letter-spacing: 0.15em;
-      color: rgba(245,240,232,0.25);
+      color: rgba(20, 20, 20,0.25);
       text-transform: uppercase;
       writing-mode: vertical-rl;
     }
@@ -332,7 +332,7 @@
       position: fixed;
       inset: 0;
       z-index: 50;
-      background: #0a0a0a;
+      background: #fcfbf9;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -358,7 +358,7 @@
     .loader-line {
       width: 80px;
       height: 0.5px;
-      background: rgba(245,240,232,0.15);
+      background: rgba(20, 20, 20,0.15);
       position: relative;
       overflow: hidden;
     }
@@ -379,7 +379,7 @@
     .loader-text {
       font-size: 9px;
       letter-spacing: 0.2em;
-      color: rgba(245,240,232,0.3);
+      color: rgba(20, 20, 20,0.3);
       text-transform: uppercase;
     }
   </style>
@@ -400,12 +400,10 @@
   <model-viewer
     id="viewer"
     src="assets/sedia-arco.glb"
-    ios-src="assets/sedia-arco.glb"
-    alt="Sedia Arco - Design Contemporaneo"
+    alt="Sedia Arco"
     ar
     ar-modes="webxr scene-viewer quick-look"
     ar-placement="floor"
-    ar-scale="auto"
     camera-controls
     auto-rotate
     auto-rotate-delay="2000"
@@ -414,10 +412,9 @@
     min-camera-orbit="auto auto 0.5m"
     max-camera-orbit="auto auto 5m"
     shadow-intensity="1.2"
-    shadow-softness="1"
-    exposure="1.8"
-    environment-image="neutral"
-    style="background: radial-gradient(ellipse at 50% 40%, #2a2720 0%, #0a0a0a 80%);"
+    shadow-softness="0.5"
+    exposure="1.4"
+    tone-mapping="commerce"
     loading="eager"
   >
     <!-- Custom slot for AR button -->
