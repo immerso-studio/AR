@@ -67,17 +67,9 @@
       padding-top: max(env(safe-area-inset-top), 16px);
     }
 
-    .brand {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: clamp(18px, 4vw, 24px);
-      font-weight: 300;
-      letter-spacing: 0.18em;
-      color: var(--cream);
-      text-transform: uppercase;
-    }
-
-    .brand span {
-      color: var(--accent);
+    .brand img {
+      height: 32px;
+      width: auto;
     }
 
     .tag {
@@ -399,13 +391,9 @@
       pointer-events: none;
     }
 
-    .loader-brand {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 28px;
-      font-weight: 300;
-      letter-spacing: 0.25em;
-      color: var(--cream);
-      text-transform: uppercase;
+    .loader-brand img {
+      height: 60px;
+      width: auto;
     }
 
     .loader-line {
@@ -441,7 +429,9 @@
 
   <!-- Loading overlay -->
   <div class="loading-overlay" id="loadingOverlay">
-    <div class="loader-brand">Forma</div>
+    <div class="loader-brand">
+      <img src="assets/logo-g&b.webp" alt="Logo">
+    </div>
     <div class="loader-line"><div class="loader-progress"></div></div>
     <div class="loader-text">Caricamento modello</div>
   </div>
@@ -483,7 +473,9 @@
 
   <!-- Top bar -->
   <header class="top-bar">
-    <div class="brand">Forma <span>Studio</span></div>
+    <div class="brand">
+      <img src="assets/logo-g&b.webp" alt="Logo">
+    </div>
     <div class="tag">AR · 3D</div>
   </header>
 
