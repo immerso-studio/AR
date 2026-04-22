@@ -7,6 +7,7 @@
   <title>SEDIA — AR Viewer</title>
 
   <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
+  <script type="module" src="https://unpkg.com/@google/model-viewer-effects/dist/model-viewer-effects.min.js"></script>
 
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Geist+Mono:wght@300;400&display=swap');
@@ -455,9 +456,11 @@
     min-camera-orbit="auto 0deg 1.5m"
     max-camera-orbit="auto 90deg auto"
     camera-target="auto auto auto"
-    shadow-intensity="1.2"
+    shadow-intensity="1"
     shadow-softness="0.5"
-    exposure="1.0"
+    exposure="0.9"
+    environment-image="neutral"
+    environment-intensity="1.5"
     loading="eager"
   >
     <!-- Custom slot for AR button -->
@@ -469,6 +472,15 @@
       </svg>
       Visualizza in AR
     </button>
+
+    <!-- Auto-shadowing effects (SSAO) -->
+    <effect-composer>
+      <ssao-effect 
+        intensity="2" 
+        radius="0.05"
+        luminance-influence="0.5">
+      </ssao-effect>
+    </effect-composer>
   </model-viewer>
 
   <!-- Top bar -->
@@ -554,6 +566,13 @@
 
     // Hide loading overlay when model is ready
     viewer.addEventListener('load', () => {
+      // Fix potential inverted normals issues by forcing double-sided rendering
+      if (viewer.model && viewer.model.materials) {
+        viewer.model.materials.forEach(material => {
+          material.setDoubleSided(false);
+        });
+      }
+
       setTimeout(() => {
         overlay.classList.add('fade-out');
         setTimeout(() => overlay.style.display = 'none', 700);
